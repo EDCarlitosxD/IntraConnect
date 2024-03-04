@@ -10,11 +10,13 @@ import com.intraConnect.intraConnect.service.interfaces.AuthService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -28,24 +30,27 @@ public class AuthServiceImp  implements AuthService {
     private AuthenticationManager authenticationManager;
     private UserRepository userRepository;
 
-    public AuthServiceImp(UserRepository userRepository, JwtService jwtService, AuthenticationManager authenticationManager){
+    private PasswordEncoder passwordEncoder;
+    public AuthServiceImp(UserRepository userRepository, JwtService jwtService, AuthenticationManager authenticationManager,PasswordEncoder passwordEncoder){
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public AuthResponse login(LoginDto user) throws UsernameNotFoundException {
-        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-           user.getEmail(),
-           user.getPassword()
-        ));
-
-        SecurityContextHolder.getContext().setAuthentication(auth);
+    public AuthResponse login(LoginDto user) throws UsernameNotFoundException, AuthenticationException {
 
         Optional<UserEntity> userFind =  userRepository.findByEmail(user.getEmail());
 
         if(userFind.isEmpty())throw new  UsernameNotFoundException("El usuario no existe");
+
+        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                user.getEmail(),
+                user.getPassword()
+        ));
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
 
         UserEntity userGet = userFind.get();
@@ -66,7 +71,7 @@ public class AuthServiceImp  implements AuthService {
 
         UserEntity userEntity = new UserEntity(null,
                 user.getUsername(),
-                user.getPassword(),
+                passwordEncoder.encode(user.getPassword()),
                 user.getName(),
                 user.getEmail(),
                 true
