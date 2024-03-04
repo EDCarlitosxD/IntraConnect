@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Optional;
@@ -35,7 +36,8 @@ public class AuthServiceTest {
 
     @Mock
     AuthenticationManager authenticationManager;
-
+    @Mock
+    PasswordEncoder passwordEncoder;
 
     @Test
     void loginSuccess(){
@@ -117,7 +119,7 @@ public class AuthServiceTest {
 
         UserEntity userEntity = new UserEntity(null,
                 dto.getUsername(),
-                dto.getPassword(),
+                "password",
                 dto.getName(),
                 dto.getEmail(),
                 true
@@ -130,6 +132,7 @@ public class AuthServiceTest {
         Authentication authentication = Mockito.mock(Authentication.class);
 
         Mockito.when(userRepository.findByEmail(dto.getEmail())).thenReturn(Optional.empty());
+        Mockito.when(passwordEncoder.encode(dto.getPassword())).thenReturn("password");
         Mockito.when(userRepository.save(userEntity)).thenReturn(userEntity);
         Mockito.when(jwtService.generateToken(userEntity)).thenReturn("token");
         //Mockito.when(authenticationManager.authenticate(tokenPassword)).thenReturn(authentication);
@@ -142,6 +145,7 @@ public class AuthServiceTest {
         AuthResponse response = authServiceImp.register(dto);
 
         Mockito.verify(userRepository, Mockito.times(1)).findByEmail(dto.getEmail());
+        Mockito.verify(passwordEncoder,Mockito.times(1)).encode(dto.getPassword());
         Mockito.verify(userRepository,Mockito.times(1)).save(userEntity);
         Mockito.verify(jwtService,Mockito.times(1)).generateToken(userEntity);
 

@@ -1,5 +1,6 @@
 package com.intraConnect.intraConnect.service;
 
+import com.intraConnect.intraConnect.entity.UserEntity;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -25,6 +26,9 @@ public class JwtService {
         return buildToken(username,id.toString(),expirationTime,claims);
     }
 
+    public String generateToken(UserEntity user){
+        return buildToken(user.getUsername(),user.getId().toString(),expirationTime,null);
+    }
 
     private String buildToken(String username, String id, Long expirationTime, Map<String, ?> claims) {
         JwtBuilder jwtBuilder = Jwts.builder()
