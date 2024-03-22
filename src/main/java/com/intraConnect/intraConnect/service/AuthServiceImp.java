@@ -4,6 +4,7 @@ import com.intraConnect.intraConnect.controller.dto.AuthResponse;
 import com.intraConnect.intraConnect.entity.UserEntity;
 import com.intraConnect.intraConnect.entity.dto.LoginDto;
 import com.intraConnect.intraConnect.entity.dto.UserDto;
+import com.intraConnect.intraConnect.enums.Departamento;
 import com.intraConnect.intraConnect.exception.EmailAlreadyExistException;
 import com.intraConnect.intraConnect.repositoy.UserRepository;
 import com.intraConnect.intraConnect.service.interfaces.AuthService;
@@ -74,7 +75,9 @@ public class AuthServiceImp  implements AuthService {
                 passwordEncoder.encode(user.getPassword()),
                 user.getName(),
                 user.getEmail(),
-                true
+                true,
+                user.getDepartamento()
+
         );
 
 

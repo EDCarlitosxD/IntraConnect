@@ -1,5 +1,6 @@
 package com.intraConnect.intraConnect.configuration;
 
+import com.intraConnect.intraConnect.configuration.filter.JwtFilter;
 import com.intraConnect.intraConnect.service.UserDetailServiceImp;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,15 +13,18 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
 @Configuration
 public class WebConfiguration {
 
     private UserDetailServiceImp userDetailServiceImp;
+    private JwtFilter jwtFilter;
 
-    public WebConfiguration(UserDetailServiceImp userDetailServiceImp){
+    public WebConfiguration(UserDetailServiceImp userDetailServiceImp,JwtFilter jwtFilter){
         this.userDetailServiceImp = userDetailServiceImp;
+        this.jwtFilter = jwtFilter;
     }
 
     @Bean
@@ -34,9 +38,11 @@ public class WebConfiguration {
                 .authorizeHttpRequests(request -> request
                                 .requestMatchers("/api/v1/auth/login").permitAll()
                                 .requestMatchers("/api/v1/auth/register").permitAll()
-                                .requestMatchers("/test/jwt/token").permitAll()
-                                .anyRequest().permitAll()
-                        );
+                                .requestMatchers("/test/jwt/").hasRole("ADMIN")
+
+                        )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+        ;
 
         return http.build();
     }

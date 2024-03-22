@@ -1,5 +1,6 @@
 package com.intraConnect.intraConnect.entity.dto;
 
+import com.intraConnect.intraConnect.enums.Departamento;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,9 @@ public class UserDto {
     private  String username;
     private  String password;
     private  String name;
-    //ROL
-    //private Departamento
+
     private String email;
+    private Departamento departamento;
+
+
 }

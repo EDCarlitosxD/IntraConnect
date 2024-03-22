@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -19,15 +20,14 @@ public class JwtService {
 
     private final Long expirationTime = 1000L;
 
-    public String generateToken(String username,Long id){
-        return buildToken(username,id.toString(),expirationTime,null);
-    }
-    public String generateToken(String username,Long id,Map<String,?> claims){
-        return buildToken(username,id.toString(),expirationTime,claims);
-    }
 
     public String generateToken(UserEntity user){
-        return buildToken(user.getUsername(),user.getId().toString(),expirationTime,null);
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put("email",user.getEmail());
+        claims.put("role",user.getDepartamento().toString());
+
+        return buildToken(user.getUsername(),user.getId().toString(),expirationTime,claims);
     }
 
     private String buildToken(String username, String id, Long expirationTime, Map<String, ?> claims) {
@@ -64,6 +64,10 @@ public class JwtService {
     public Claims getClaims(String token) throws JwtException{
             return Jwts.parserBuilder().setSigningKey(getKey()).build()
                     .parseClaimsJws(token).getBody();
+    }
+
+    public String getEmailClaim(String token) throws  JwtException{
+        return getClaims(token).get("email",String.class);
     }
 
 
